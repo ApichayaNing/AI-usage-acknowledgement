@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ECU AI Usage Acknowledgement Tool — Pilot</title>
+  <meta name="description" content="Static, code-only prototype to help students generate an ECU-style acknowledgement of generative AI use. Optional anonymous analytics via Microsoft Forms (DLP-friendly)." />
+  <link rel="stylesheet" href="assets/css/ecu.css" />
+  <link rel="preconnect" href="https://forms.office.com">    
+  <link rel="dns-prefetch" href="//forms.office.com">
+
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-header" role="banner" aria-label="Site header">
+    <div class="brandbar"></div>
+        <h1 class="title">ECU AI Usage Acknowledgement Tool</h1>
+        <p class="subtitle">Pilot prototype to help students generate an ECU-style acknowledgement of generative AI use. Optional anonymous analytics via Microsoft Forms (DLP-friendly).</p>
+  </header>
+
+  <main id="main" class="wrap" role="main">
+    <section class="grid">
+      <!-- Left: Minimal input form -->
+      <section class="card">
+        <h2>Generate your statement</h2>
+
+        <fieldset class="section" id="behaviours">
+          <label class="field-label">1) Behaviours</label>
+          <p class="hint">Choose what you used AI for.</p>
+          <div id="behaviourPills" class="row" aria-live="polite"></div>
+          <label class="inline"><input type="checkbox" id="behOtherChk" /> Add “Other”</label>
+          <input type="text" id="behOtherText" class="input" placeholder="Other behaviours, e.g., outlining; brainstorming specific angles" style="display:none" />
+        </fieldset>
+
+        <fieldset class="section" id="tools">
+          <label class="field-label">2) Tools used</label>
+          <p class="hint">Free text (comma-separated). <em>Example:</em> ChatGPT, Microsoft Copilot, Grammarly</p>
+          <input type="text" id="toolsText" class="input" placeholder="e.g., ChatGPT, Microsoft Copilot" />
+        </fieldset>
+
+        <fieldset class="section">
+          <label class="field-label">3) Other details (optional)</label>
+          <p class="hint">Add a short note, e.g., “Checked references manually; did not upload full draft”.</p>
+          <textarea id="otherDetails" rows="3" class="input" placeholder="Optional"></textarea>
+        </fieldset>
+
+        <div class="section stack">
+          <button id="generateBtn" class="btn primary">Generate</button>
+        </div>
+      </section>
+
+      <!-- Right: Output + analytics -->
+      <section id="statementCard" class="card">
+        <h2>Your statement</h2>
+        <div id="errors" class="hint error" aria-live="polite"></div>
+        <div class="result" aria-live="polite">
+          <pre id="statementText">Select behaviours, enter tools, then press “Generate”.</pre>
+        </div>
+        <div class="section stack">
+          <button id="copyStmtBtn" class="btn">Copy statement</button>
+          <button id="printBtn" class="btn ghost" title="Print or Save to PDF">Print / Save PDF</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <h2>Anonymous analytics (optional)</h2>
+        <p class="hint">To help ECU understand how students are acknowledging AI use, you can submit an anonymous code. <strong>No PII or assignment text</strong> is collected.</p>
+        <div class="section stack">
+          <button id="buildPayloadBtn" class="btn">Build anonymous code</button>
+          <button id="copyPayloadBtn" class="btn success" disabled>Copy anonymous code</button>
+          <button id="toFormBtn" class="btn ghost">Go to Form</button>
+        </div>
+        <div id="payloadWrap" class="result" style="display:none">
+          <pre id="payloadText"></pre>
+        </div>
+
+        <div class="result" id="formsShell">
+        <iframe id="formsFrame"
+          title="Anonymous AI-use submission"
+          width="100%" height="480" frameborder="0" loading="lazy"
+          src="about:blank"
+          style="border:none;max-width:100%;max-height:100vh"></iframe>
+        </div>
+        <!-- Same-tab fallback (no new window) -->
+        <p class="hint" style="margin-top:8px">
+            If the form doesn’t appear or is blocked, 
+        <a href="#" id="openFormSameTab">open the full form in this tab</a>.
+        </p>
+        </div>
+
+
+        <footer class="privacy">
+          <p><strong>Privacy:</strong> This page runs locally in your browser. Optional analytics only include behaviours, tool names, an optional note, a timestamp, and the fixed action <code>declaration_generated</code>. Target retention for the pilot is 180 days.</p>
+        </footer>
+      </section>
+    </section>
+  </main>
+  
+  <footer class="site-footer" role="contentinfo" aria-label="Footer">
+  <div class="wrap footer-inner">
+    <div class="footer-meta">
+      <div>
+        © <span id="year"></span> Edith Cowan University. All rights reserved.
+        <span class="sep">•</span> Pilot prototype (for testing) — not an official policy document.
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
