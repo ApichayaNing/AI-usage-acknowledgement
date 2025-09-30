@@ -74,38 +74,45 @@
         <div class="divider"></div>
 
         <h3>Anonymous AI-use submission</h3>
-        <h4 class="mt-0">Plain-text for Microsoft Form</h4>
-        <p class="muted">Use these one-click copies, then paste into the Form fields below.</p>
+        <p class="muted">
+        Anonymous pilot analytics to inform better guidance and marking. 
+        We collect behaviours, tools, and optional notes—no personal details or assignment text.
+        </p>
 
-        <div class="field-copy" aria-label="Quick copy for matching Form fields">
-        <button id="copyMapMicro" class="btn btn-xxs">Copy → Usage mapping</button>
-        <button id="copyBehMicro" class="btn btn-xxs ghost">Copy → Behaviours used</button>
-        <button id="copyToolsMicro" class="btn btn-xxs ghost">Copy → AI tools used</button>
-        <button id="copyNoteMicro" class="btn btn-xxs ghost">Copy → Other notes</button>
-        <button id="toFormBtn" class="btn ghost">Go to Form</button>
+        <p class="muted">Use these one-click copies, then paste into the matching fields.</p>
+
+        <div class="form-actions" aria-label="Quick copy for matching Form fields">
+        <button id="copyMapMicro"   class="btn btn-xxs">📋 Copy mapping</button>
+        <button id="copyBehMicro"   class="btn btn-xxs ghost">📋 Behaviours</button>
+        <button id="copyToolsMicro" class="btn btn-xxs ghost">📋 Tools</button>
+        <button id="copyNoteMicro"  class="btn btn-xxs ghost">📋 Other notes</button>
         </div>
 
-        <div class="callout alert" role="status">
-          If the Microsoft Form doesn’t appear or is blocked,
-          <a href="#" id="openFormSameTab" class="link-strong">open the full form in this tab</a>.
+    <ol class="mini-steps">
+    <li>Copy <em>mapping</em> → paste into <strong>Usage mapping (tool → behaviours)</strong>.</li>
+    <li>Copy <em>behaviours</em> and <em>tools</em> → paste into their fields.</li>
+    <li>Add <em>other notes</em> (optional), then submit.</li>
+    </ol>
+
+        <div class="callout tip" role="status">
+        If the form doesn’t appear, <a href="#" id="openFormSameTab" class="link-strong">open the full form in this tab</a>.
         </div>
 
-        <!-- Embedded Microsoft Form -->
-        <section id="formsSection" class="forms-embed">
-          <!-- app.js will set src from APP_CONFIG.formsEmbedUrl -->
-          <iframe
+    <section id="formsSection" class="forms-embed">
+        <div class="spinner" aria-hidden="true">Loading Microsoft Form…</div>
+        <iframe
             id="formsFrame"
             title="ECU AI Use — Anonymous"
             width="100%"
-            height="720"
-            style="border:0; background:#fff; border-radius:12px"
+            height="600"
+            style="border:0;background:#fff;border-radius:12px"
             src=""
             allowfullscreen
             webkitallowfullscreen
             mozallowfullscreen
             msallowfullscreen>
-          </iframe>
-        </section>
+        </iframe>
+    </section>
 
         <footer class="privacy">
           <p><strong>Privacy:</strong> This page runs locally in your browser. Optional analytics only include behaviours, tool names, an optional note, a timestamp, and the fixed action <code>declaration_generated</code>. Target retention for the pilot is 180 days.</p>

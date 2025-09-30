@@ -166,3 +166,23 @@ body{
 /* Micro copy buttons */
 .field-copy{display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0}
 .btn-xxs{font-size:.85rem;padding:.25rem .6rem;border-radius:8px;line-height:1.1}
+
+/* Micro copy row */
+.form-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0 1rem}
+.btn-xxs{font-size:.9rem;padding:.35rem .7rem;border-radius:10px;line-height:1.1}
+
+/* Mini steps */
+.mini-steps{margin:.25rem 0 1rem 1.25rem;color:#4a5568}
+.mini-steps li{margin:.15rem 0}
+
+/* Callouts */
+.callout.tip{background:#eefaf6;border:1px solid #cdeee2;color:#194d3b;padding:.75rem 1rem;border-radius:10px}
+
+/* Form embed with loading state */
+.forms-embed{position:relative}
+.forms-embed .spinner{
+  position:absolute;inset:0;display:grid;place-items:center;
+  background:#f8fbfa;border:1px dashed #dbe7e3;border-radius:12px;
+  font-size:.95rem;color:#2c4a42
+}
+.forms-embed.loaded .spinner{display:none}
