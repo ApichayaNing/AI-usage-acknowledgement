@@ -21,13 +21,17 @@
 
   <main id="main" class="wrap" role="main">
     <section class="grid">
-      <!-- Left: Minimal input form -->
+      <!-- Left: Input -->
       <section class="card">
         <h2>Generate your statement</h2>
 
         <fieldset class="section" id="behaviours">
           <label class="field-label">1) Behaviours</label>
-          <p class="hint">Choose what you used AI for.</p>
+          <p class="hint">
+            Select a behaviour, then add the tool(s) you used for that behaviour. You can add multiple tools under each behaviour.
+          </p>
+
+          <!-- JS will render each behaviour with its own tool panel inside here -->
           <div id="behaviourPills" class="row" aria-live="polite"></div>
 
           <label class="inline">
@@ -42,14 +46,8 @@
           />
         </fieldset>
 
-        <fieldset class="section" id="tools">
-          <label class="field-label">2) Tools used</label>
-          <p class="hint">Free text (comma-separated). <em>Example:</em> ChatGPT, Microsoft Copilot, Grammarly</p>
-          <input type="text" id="toolsText" class="input" placeholder="e.g., ChatGPT, Microsoft Copilot" />
-        </fieldset>
-
         <fieldset class="section">
-          <label class="field-label">3) Other details (optional)</label>
+          <label class="field-label">2) Other details (optional)</label>
           <p class="hint">Add a short note, e.g., “Checked references manually; did not upload full draft”.</p>
           <textarea id="otherDetails" rows="3" class="input" placeholder="Optional"></textarea>
         </fieldset>
@@ -59,12 +57,12 @@
         </div>
       </section>
 
-      <!-- Right: Output + analytics -->
+      <!-- Right: Output + submission -->
       <section id="statementCard" class="card">
         <h2>Your statement</h2>
         <div id="errors" class="hint error" aria-live="polite"></div>
         <div class="result" aria-live="polite">
-          <pre id="statementText">Select behaviours, enter tools, then press “Generate”.</pre>
+          <pre id="statementText">Select a behaviour, add its tool(s), then press “Generate”.</pre>
         </div>
         <div class="section stack">
           <button id="copyStmtBtn" class="btn">Copy statement</button>
@@ -75,32 +73,32 @@
 
         <h3>Anonymous AI-use submission</h3>
         <p class="muted">
-        Anonymous pilot analytics to inform better guidance and marking. 
-        We collect behaviours, tools, and optional notes—no personal details or assignment text.
+          Anonymous pilot analytics to inform better guidance and marking.
+          We collect behaviours, tools, and optional notes—<strong>no personal details or assignment text</strong>.
         </p>
 
         <p class="muted">Use these one-click copies, then paste into the matching fields.</p>
 
         <div class="form-actions" aria-label="Quick copy for matching Form fields">
-        <button id="copyMapMicro"   class="btn btn-xxs">📋 Copy mapping</button>
-        <button id="copyBehMicro"   class="btn btn-xxs ghost">📋 Behaviours</button>
-        <button id="copyToolsMicro" class="btn btn-xxs ghost">📋 Tools</button>
-        <button id="copyNoteMicro"  class="btn btn-xxs ghost">📋 Other notes</button>
+          <button id="copyMapMicro"   class="btn btn-xxs">📋 Copy mapping</button>
+          <button id="copyBehMicro"   class="btn btn-xxs ghost">📋 Copy Behaviours</button>
+          <button id="copyToolsMicro" class="btn btn-xxs ghost">📋 Copy Tools</button>
+          <button id="copyNoteMicro"  class="btn btn-xxs ghost">📋 Copy Other Details</button>
         </div>
 
-    <ol class="mini-steps">
-    <li>Copy <em>mapping</em> → paste into <strong>Usage mapping (tool → behaviours)</strong>.</li>
-    <li>Copy <em>behaviours</em> and <em>tools</em> → paste into their fields.</li>
-    <li>Add <em>other notes</em> (optional), then submit.</li>
-    </ol>
+        <ol class="mini-steps">
+          <li>Copy <em>mapping</em> → paste into <strong>Usage mapping (tool → behaviours)</strong>.</li>
+          <li>Copy <em>behaviours</em> and <em>tools</em> → paste into their fields.</li>
+          <li>Add <em>other notes</em> (optional), then submit.</li>
+        </ol>
 
         <div class="callout tip" role="status">
-        If the form doesn’t appear, <a href="#" id="openFormSameTab" class="link-strong">open the full form in this tab</a>.
+          If the form doesn’t appear, <a href="#" id="openFormSameTab" class="link-strong">open the full form in this tab</a>.
         </div>
 
-    <section id="formsSection" class="forms-embed">
-        <div class="spinner" aria-hidden="true">Loading Microsoft Form…</div>
-        <iframe
+        <section id="formsSection" class="forms-embed">
+          <div class="spinner" aria-hidden="true">Loading Microsoft Form…</div>
+          <iframe
             id="formsFrame"
             title="ECU AI Use — Anonymous"
             width="100%"
@@ -111,8 +109,8 @@
             webkitallowfullscreen
             mozallowfullscreen
             msallowfullscreen>
-        </iframe>
-    </section>
+          </iframe>
+        </section>
 
         <footer class="privacy">
           <p><strong>Privacy:</strong> This page runs locally in your browser. Optional analytics only include behaviours, tool names, an optional note, a timestamp, and the fixed action <code>declaration_generated</code>. Target retention for the pilot is 180 days.</p>

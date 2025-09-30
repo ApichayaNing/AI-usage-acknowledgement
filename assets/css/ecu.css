@@ -186,3 +186,29 @@ body{
   font-size:.95rem;color:#2c4a42
 }
 .forms-embed.loaded .spinner{display:none}
+
+.beh-item{display:block;margin:.35rem 0}
+.beh-item .pill{display:inline-flex;gap:.4rem;align-items:center}
+.beh-tools{display:none;margin:.35rem 0 .5rem 1.8rem;padding:.6rem .7rem;background:#f6faf9;border:1px solid #d7e9e3;border-radius:10px}
+.beh-tools.show{display:block}
+.tool-row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.tool-row input[type="text"]{max-width:260px}
+.tool-chips{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem}
+.chip{background:#eef3f2;border:1px solid #cfe1dd;border-radius:999px;padding:.18rem .55rem;font-size:.9rem}
+.chip button{border:none;background:transparent;margin-left:.4rem;cursor:pointer}
+
+/* 2×2 layout for the copy buttons */
+.form-actions{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap:.6rem .8rem;
+  max-width: 520px;     /* keeps it tidy */
+  margin-block:.4rem .2rem;
+}
+.form-actions .btn{ width:100%; justify-content:center; }
+
+/* Stack to one column on small screens */
+@media (max-width:560px){
+  .form-actions{ grid-template-columns: 1fr; max-width: 420px; }
+}
+

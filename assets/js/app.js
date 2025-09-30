@@ -8,32 +8,107 @@
   };
   const CFG = window.APP_CONFIG || {};
 
-  // ===== Render behaviour chips =====
-  function renderBehaviours() {
+  // ========= BEHAVIOUR-FIRST MAPPING =========
+  // Map of behaviourId -> Set(tools)
+  const BehTools = new Map();
+
+  function normaliseToolFree(s){
+    return (s||'').trim()
+      .replace(/\s+/g,' ')
+      .replace(/^chat ?gpt$/i,'ChatGPT')
+      .replace(/^copilot$/i,'Microsoft Copilot');
+  }
+
+  // Render the behaviours list where each ticked behaviour reveals its own tools panel
+  function renderBehaviours(){
     const host = $('#behaviourPills');
     if (!host || !CFG.behaviours) return;
     host.innerHTML = '';
-    CFG.behaviours.forEach(opt => {
+
+    CFG.behaviours.forEach(opt=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'beh-item';
+
+      // checkbox pill
       const lbl = document.createElement('label');
       lbl.className = 'pill';
       lbl.innerHTML = `<input type="checkbox" value="${opt.id}"> <span>${opt.label}</span>`;
-      host.appendChild(lbl);
+      wrap.appendChild(lbl);
+
+      // sub-panel (tools for this behaviour)
+      const panel = document.createElement('div');
+      panel.className = 'beh-tools';
+      panel.innerHTML = `
+        <div class="tool-row">
+          <input type="text" class="input tool-input" placeholder="Type or pick a tool, then click Add" list="tool-suggestions" aria-label="Tool name">
+          <button type="button" class="btn btn-xxs add-tool">Add</button>
+        </div>
+        <div class="tool-chips"></div>
+      `;
+      wrap.appendChild(panel);
+
+      // checkbox toggle → show/hide; init/clear map entry
+      const cb = lbl.querySelector('input');
+      cb.addEventListener('change', ()=>{
+        if (cb.checked){
+          panel.classList.add('show');
+          if (!BehTools.has(opt.id)) BehTools.set(opt.id, new Set());
+        } else {
+          panel.classList.remove('show');
+          BehTools.delete(opt.id);  // unselect clears its tools (simple rule)
+          renderToolChips(panel, opt.id);
+        }
+      });
+
+      // add tool
+      const addBtn = panel.querySelector('.add-tool');
+      const inp = panel.querySelector('.tool-input');
+      addBtn.addEventListener('click', ()=>{
+        const v = normaliseToolFree(inp.value);
+        if (!v) { toast('Enter a tool'); return; }
+        if (!BehTools.has(opt.id)) BehTools.set(opt.id, new Set());
+        BehTools.get(opt.id).add(v);
+        inp.value = '';
+        renderToolChips(panel, opt.id);
+      });
+      inp.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter'){ e.preventDefault(); addBtn.click(); }
+      });
+
+      host.appendChild(wrap);
+    });
+
+    ensureToolDatalist();
+  }
+
+  function renderToolChips(panel, behId){
+    const chips = panel.querySelector('.tool-chips');
+    chips.innerHTML = '';
+    const set = BehTools.get(behId) || new Set();
+    [...set].forEach(tool=>{
+      const span = document.createElement('span');
+      span.className = 'chip';
+      span.innerHTML = `${tool} <button aria-label="Remove ${tool}">×</button>`;
+      span.querySelector('button').addEventListener('click', ()=>{
+        set.delete(tool);
+        renderToolChips(panel, behId);
+      });
+      chips.appendChild(span);
     });
   }
 
-  // ===== Helpers =====
-  function selectedBehaviours() {
-    const ids = $$('#behaviourPills input:checked').map(i => i.value);
-    const otherChk = $('#behOtherChk');
-    if (otherChk && otherChk.checked) {
-      const extraEl = $('#behOtherText');
-      const extra = (extraEl?.value || '').trim();
-      if (extra) ids.push(...extra.split(',').map(s => s.trim()).filter(Boolean));
-    }
-    return ids;
+  function ensureToolDatalist(){
+    if (document.getElementById('tool-suggestions')) return;
+    const dl = document.createElement('datalist');
+    dl.id = 'tool-suggestions';
+    dl.innerHTML = [
+      'ChatGPT','Microsoft Copilot','Perplexity','Grammarly','QuillBot','Claude','Bing Copilot','DeepSeek'
+    ].map(t=>`<option value="${t}">`).join('');
+    document.body.appendChild(dl);
   }
 
-  // --- Tool normalisation & de-dupe ---
+  // ========= LEGACY INPUTS (kept but de-emphasised) =========
+  // If you still keep the free-text tools input (#toolsText), we’ll normalise & de-dupe it and union with mapping tools for copy convenience.
   function toolsArrayRaw() {
     const input = $('#toolsText');
     const raw = (input?.value || '').trim();
@@ -49,24 +124,22 @@
     if (/^quill\s*bot$|^quillbot$/.test(t)) return 'QuillBot';
     if (/^claude\b/.test(t)) return 'Claude';
     if (/^deepseek\b/.test(t)) return 'DeepSeek';
-    return titleCase(s); // sensible default
+    return titleCase(s);
   }
   function toolsArray() {
     const canon = toolsArrayRaw().map(canonicalToolName);
     return [...new Set(canon)];
   }
 
-  // Context (site + timezone)
+  // ========= CONTEXT / UTILS =========
   function getContext() {
     try {
       return {
         site: location.hostname || '',
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
-        tz_offset_min: (new Date().getTimezoneOffset() * -1) // minutes from UTC
+        tz_offset_min: (new Date().getTimezoneOffset() * -1)
       };
-    } catch {
-      return { site: '', tz: '', tz_offset_min: 0 };
-    }
+    } catch { return { site: '', tz: '', tz_offset_min: 0 }; }
   }
 
   const humanise = (arr) => {
@@ -81,89 +154,116 @@
     return ids.map(x => map[x] || x);
   }
 
-  // ===== Plain-text for Microsoft Form (one-click copies) =====
-  function behavioursText() { return behaviourLabels(selectedBehaviours()).join(', '); }
-  function toolsText() { return toolsArray().join(', '); }
-
-  // Simple, readable mapping: each tool -> all selected behaviours
-  // Example: "ChatGPT — brainstorming; structuring | Grammarly — editing"
-  function mappingText() {
-    const behs = behaviourLabels(selectedBehaviours());
-    const tools = toolsArray();
-    if (!behs.length || !tools.length) return '';
-    const behJoined = behs.join('; ');
-    return tools.map(t => `${t} — ${behJoined}`).join(' | ');
+  // ========= COMPUTED TEXTS FROM MAPPING =========
+  function selectedBehavioursFromMap(){
+    return [...BehTools.keys()];
   }
 
-  function otherNotesText() {
+  function toolsFromMap(){
+    const all = new Set();
+    BehTools.forEach(set => set.forEach(t => all.add(t)));
+    return [...all];
+  }
+
+  function behavioursText(){
+    return behaviourLabels(selectedBehavioursFromMap()).join(', ');
+  }
+
+  function toolsText(){
+    // union of tools manually typed (if any) and tools from mapping
+    const fromPairs = toolsFromMap();
+    const typed = toolsArray();
+    return [...new Set([...typed, ...fromPairs])].join(', ');
+  }
+
+  // tool — behaviours; … (group by tool)
+  function mappingText(){
+    const toolToBehs = new Map();
+    BehTools.forEach((set, behId)=>{
+      const behLabel = behaviourLabels([behId])[0];
+      set.forEach(tool=>{
+        const arr = toolToBehs.get(tool) || [];
+        arr.push(behLabel);
+        toolToBehs.set(tool, arr);
+      });
+    });
+    const parts = [];
+    toolToBehs.forEach((behs, tool)=>{
+      parts.push(`${tool} — ${[...new Set(behs)].join('; ')}`);
+    });
+    return parts.join(' | ');
+  }
+
+  function otherNotesText(){
     return ($('#otherDetails')?.value || '').trim();
   }
 
-  function copyToClipboard(str, ok = 'Copied') {
+  function copyToClipboard(str, ok = 'Copied'){
     if (!str) { toast('Nothing to copy'); return; }
-    navigator.clipboard?.writeText(str)
-      .then(() => toast(ok))
-      .catch(() => toast('Copy failed'));
+    navigator.clipboard.writeText(str).then(()=>toast(ok)).catch(()=>toast('Copy failed'));
   }
 
-  // ===== Build statement (single, standard style) =====
-  function buildStatement(tools, behs, note) {
+  // ========= STATEMENT =========
+  function buildStatement(){
+    const tools = toolsFromMap();
+    const behs = behaviourLabels(selectedBehavioursFromMap());
+    const note = otherNotesText();
     const toolsTxt = humanise(tools);
-    const behTxt = humanise(behaviourLabels(behs));
+    const behTxt = humanise(behs);
     const base = `I used ${toolsTxt || '[tool]'} to support ${behTxt || '[behaviour]'} while preparing this assessment. I critically reviewed and edited all outputs, and the final submission represents my own understanding, analysis and writing.`;
+    const spec = mappingText() ? ` Specifically, I used ${mappingText().replace(/\|/g,'; ')}.` : '';
     const privacy = ` No personal data or full assignment text was provided to AI systems beyond what is disclosed here.`;
-    const extra = note ? ` ${note.trim()}` : '';
-    return base + privacy + extra;
+    const extra = note ? ` ${note}` : '';
+    return base + spec + privacy + extra;
   }
 
-  // ===== Validation =====
-  function validate() {
+  // ========= VALIDATION =========
+  function validate(){
     const errs = [];
-    if (selectedBehaviours().length === 0) errs.push('Select at least one behaviour.');
-    if (toolsArray().length === 0) errs.push('Enter at least one AI tool (comma-separated).');
+    const hasPair = [...BehTools.values()].some(set => set.size > 0);
+    if (!hasPair) errs.push('Add at least one tool under a behaviour.');
     return errs;
   }
 
-  // ===== Analytics payload (BASE64-JSON) – kept for future use =====
-  function buildPayload() {
+  // ========= (Optional) ANALYTICS PAYLOAD (kept for future) =========
+  function buildPayload(){
     const ctx = getContext();
     const payload = {
       v: (CFG.payloadVersion ?? 1),
       ts: new Date().toISOString(),
-      behaviours: selectedBehaviours(),
-      tools: toolsArray(), // normalised + deduped
-      note: ($('#otherDetails')?.value || '').trim(),
+      behaviours: selectedBehavioursFromMap(),
+      tools: toolsFromMap(),
+      note: otherNotesText(),
       action: (CFG.analyticsAction || 'declaration_generated'),
       site: ctx.site,
       tz: ctx.tz,
       tz_offset_min: ctx.tz_offset_min
     };
     const json = JSON.stringify(payload);
-    const b64 = btoa(unescape(encodeURIComponent(json))); // base64-utf8
+    const b64 = btoa(unescape(encodeURIComponent(json)));
     return { json, b64 };
   }
 
-  // ===== UI events =====
-  function onGenerate() {
+  // ========= UI HANDLERS =========
+  function onGenerate(){
     const errs = validate();
     const errBox = $('#errors');
     const out = $('#statementText');
-    if (errs.length) {
+    if (errs.length){
       if (errBox) errBox.textContent = errs.join(' ');
       if (out) out.textContent = '––';
       return;
     }
     if (errBox) errBox.textContent = '';
-    const stmt = buildStatement(toolsArray(), selectedBehaviours(), $('#otherDetails')?.value);
-    if (out) out.textContent = stmt;
+    if (out) out.textContent = buildStatement();
     toast('Statement generated');
   }
 
-  function onCopyStatement() {
+  function onCopyStatement(){
     const out = $('#statementText');
     const text = (out?.textContent || '');
-    if (!text || text === '––') { toast('Nothing to copy'); return; }
-    navigator.clipboard?.writeText(text).then(() => toast('Statement copied')).catch(() => {
+    if (!text || text === '––'){ toast('Nothing to copy'); return; }
+    navigator.clipboard.writeText(text).then(()=>toast('Statement copied')).catch(()=>{
       const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
       try { document.execCommand('copy'); toast('Statement copied'); } catch { toast('Copy failed'); }
       finally { ta.remove(); }
@@ -171,10 +271,10 @@
   }
 
   let lastPayload = null;
-  function onBuildPayload() {
+  function onBuildPayload(){
     const errs = validate();
     const errBox = $('#errors');
-    if (errs.length) {
+    if (errs.length){
       if (errBox) errBox.textContent = errs.join(' ');
       toast('Fix issues before building code');
       return;
@@ -182,88 +282,87 @@
     if (errBox) errBox.textContent = '';
     lastPayload = buildPayload();
     const payloadEl = $('#payloadText');
-    if (payloadEl) payloadEl.textContent = lastPayload.b64; // minimal (no debug JSON)
+    if (payloadEl) payloadEl.textContent = lastPayload.b64;
     const wrap = $('#payloadWrap'); if (wrap) wrap.style.display = 'block';
     const copyBtn = $('#copyPayloadBtn'); if (copyBtn) copyBtn.disabled = false;
     toast('Anonymous code ready');
   }
 
-  function onCopyPayload() {
-    if (!lastPayload) { toast('Build the code first'); return; }
-    navigator.clipboard?.writeText(lastPayload.b64).then(() => toast('Anonymous code copied')).catch(() => toast('Copy failed'));
+  function onCopyPayload(){
+    if (!lastPayload){ toast('Build the code first'); return; }
+    navigator.clipboard.writeText(lastPayload.b64)
+      .then(()=>toast('Anonymous code copied'))
+      .catch(()=>toast('Copy failed'));
   }
 
-  function onGoToForm() {
-    const section = $('#formsSection');
-    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  function onGoToForm(){
+    $('#formsSection')?.scrollIntoView({behavior:'smooth', block:'start'});
   }
 
-  function toggleOther() {
+  function toggleOther(){
     const el = $('#behOtherText');
     const chk = $('#behOtherChk');
     if (el && chk) el.style.display = chk.checked ? 'block' : 'none';
   }
 
-  // ===== Init =====
-  function init() {
+  // ========= INIT =========
+  function init(){
     renderBehaviours();
 
-    // Load the iframe from config (embed)
-    if (CFG.formsEmbedUrl && CFG.formsEmbedUrl.startsWith('http')) {
+    // Load Forms iframe from config
+    if (CFG.formsEmbedUrl && CFG.formsEmbedUrl.startsWith('http')){
       const frame = $('#formsFrame');
       if (frame) frame.src = CFG.formsEmbedUrl;
     }
 
     // Same-tab fallback link
     const link = $('#openFormSameTab');
-    if (link) {
-      link.addEventListener('click', (e) => {
+    if (link){
+      link.addEventListener('click', (e)=>{
         e.preventDefault();
-        const url = CFG.formsShareUrl || (CFG.formsEmbedUrl ? CFG.formsEmbedUrl.replace('&embed=true', '') : '');
-        if (url) window.location.assign(url); // SAME tab
+        const url = CFG.formsShareUrl || (CFG.formsEmbedUrl ? CFG.formsEmbedUrl.replace('&embed=true','') : '');
+        if (url) window.location.assign(url);
       });
     }
 
-    // Buttons / interactions (guard for missing elements)
+    // Buttons
     $('#generateBtn')?.addEventListener('click', onGenerate);
     $('#copyStmtBtn')?.addEventListener('click', onCopyStatement);
     $('#printBtn')?.addEventListener('click', () => window.print());
 
-    // Micro buttons matching the Microsoft Form fields
-    $('#copyMapMicro')?.addEventListener('click', () => {
+    // Copy buttons matching the Form fields
+    $('#copyMapMicro')?.addEventListener('click', ()=>{
       const txt = mappingText();
-      if (!txt) { toast('Add behaviours and tools first'); return; }
+      if (!txt){ toast('Add at least one tool under a behaviour'); return; }
       copyToClipboard(txt, 'Usage mapping copied');
     });
-    $('#copyBehMicro')?.addEventListener('click', () => {
+    $('#copyBehMicro')?.addEventListener('click', ()=>{
       const txt = behavioursText();
-      if (!txt) { toast('Select at least one behaviour'); return; }
+      if (!txt){ toast('Select behaviours and add tools'); return; }
       copyToClipboard(txt, 'Behaviours copied');
     });
-    $('#copyToolsMicro')?.addEventListener('click', () => {
+    $('#copyToolsMicro')?.addEventListener('click', ()=>{
       const txt = toolsText();
-      if (!txt) { toast('Enter at least one tool'); return; }
+      if (!txt){ toast('Add a tool'); return; }
       copyToClipboard(txt, 'Tools copied');
     });
-    $('#copyNoteMicro')?.addEventListener('click', () => {
+    $('#copyNoteMicro')?.addEventListener('click', ()=>{
       const txt = otherNotesText();
-      if (!txt) { toast('No notes to copy'); return; }
+      if (!txt){ toast('No notes to copy'); return; }
       copyToClipboard(txt, 'Other notes copied');
     });
 
-    // Optional big button for notes (keep if present in HTML)
-    $('#copyNoteBtn')?.addEventListener('click', () => {
-      const txt = otherNotesText();
-      if (!txt) { toast('No notes to copy'); return; }
-      copyToClipboard(txt, 'Other notes copied');
-    });
-
-    // Legacy anonymous-code buttons (can be hidden in UI if unused)
+    // Legacy anonymous-code buttons (optional)
     $('#buildPayloadBtn')?.addEventListener('click', onBuildPayload);
     $('#copyPayloadBtn')?.addEventListener('click', onCopyPayload);
 
     $('#toFormBtn')?.addEventListener('click', onGoToForm);
     $('#behOtherChk')?.addEventListener('change', toggleOther);
+
+    // Optional spinner ‘loaded’ class
+    const fs = document.getElementById('formsSection');
+    const iframe = document.getElementById('formsFrame');
+    if (iframe && fs) iframe.addEventListener('load', () => fs.classList.add('loaded'));
 
     // Footer year
     const y = document.getElementById('year');
