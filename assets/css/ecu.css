@@ -162,3 +162,7 @@ body{
 }
 .link-strong{ font-weight:700; text-decoration:underline; color:inherit }
 .link-strong:hover{ text-decoration:none }
+
+/* Micro copy buttons */
+.field-copy{display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0}
+.btn-xxs{font-size:.85rem;padding:.25rem .6rem;border-radius:8px;line-height:1.1}

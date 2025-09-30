@@ -43,7 +43,6 @@
     if (/^bing(\s*copilot)?$/.test(t)) return 'Bing Copilot';
     if (/^grammarly\b/.test(t)) return 'Grammarly';
     if (/^quill\s*bot$|^quillbot$/.test(t)) return 'QuillBot';
-    // (Optional) common extras:
     if (/^claude\b/.test(t)) return 'Claude';
     if (/^deepseek\b/.test(t)) return 'DeepSeek';
     return titleCase(s); // sensible default
@@ -76,6 +75,27 @@
     return ids.map(x => map[x] || x);
   }
 
+  // ===== Plain-text for Microsoft Form (one-click copies) =====
+  function behavioursText(){
+    return behaviourLabels(selectedBehaviours()).join(', ');
+  }
+  function toolsText(){
+    return toolsArray().join(', ');
+  }
+  // Simple, readable mapping: each tool -> all selected behaviours
+  // Example: "ChatGPT — brainstorming; structuring | Grammarly — editing"
+  function mappingText(){
+    const behs = behaviourLabels(selectedBehaviours());
+    const tools = toolsArray();
+    if (!behs.length || !tools.length) return '';
+    const behJoined = behs.join('; ');
+    return tools.map(t => `${t} — ${behJoined}`).join(' | ');
+  }
+  function copyToClipboard(str, ok='Copied'){
+    if(!str){ toast('Nothing to copy'); return; }
+    navigator.clipboard?.writeText(str).then(()=>toast(ok)).catch(()=>toast('Copy failed'));
+  }
+
   // ===== Build statement (single, standard style) =====
   function buildStatement(tools, behs, note){
     const toolsTxt = humanise(tools);
@@ -94,7 +114,7 @@
     return errs;
   }
 
-  // ===== Analytics payload (BASE64-JSON) =====
+  // ===== Analytics payload (BASE64-JSON) – kept for future use =====
   function buildPayload(){
     const ctx = getContext();
     const payload = {
@@ -158,6 +178,10 @@
     toast('Anonymous code ready');
   }
 
+  function otherNotesText(){
+    return ($('#otherDetails')?.value || '').trim();
+}
+
   function onCopyPayload(){
     if(!lastPayload){ toast('Build the code first'); return; }
     navigator.clipboard?.writeText(lastPayload.b64).then(()=>toast('Anonymous code copied')).catch(()=>toast('Copy failed'));
@@ -198,8 +222,43 @@
     $('#generateBtn')?.addEventListener('click', onGenerate);
     $('#copyStmtBtn')?.addEventListener('click', onCopyStatement);
     $('#printBtn')?.addEventListener('click', () => window.print());
+
+   // Micro buttons matching the Microsoft Form fields
+    $('#copyMapMicro')?.addEventListener('click', ()=>{
+    const txt = mappingText();
+    if(!txt){ toast('Add behaviours and tools first'); return; }
+    copyToClipboard(txt, 'Usage mapping copied');
+    });
+    $('#copyBehMicro')?.addEventListener('click', ()=>{
+    const txt = behavioursText();
+    if(!txt){ toast('Select at least one behaviour'); return; }
+    copyToClipboard(txt, 'Behaviours copied');
+    });
+    $('#copyToolsMicro')?.addEventListener('click', ()=>{
+    const txt = toolsText();
+    if(!txt){ toast('Enter at least one tool'); return; }
+    copyToClipboard(txt, 'Tools copied');
+    });
+
+    // Micro: Other notes
+    $('#copyNoteMicro')?.addEventListener('click', ()=>{
+    const txt = otherNotesText();
+    if(!txt){ toast('No notes to copy'); return; }
+    copyToClipboard(txt, 'Other notes copied');
+    });
+
+    // (Optional big button)
+    $('#copyNoteBtn')?.addEventListener('click', ()=>{
+    const txt = otherNotesText();
+    if(!txt){ toast('No notes to copy'); return; }
+    copyToClipboard(txt, 'Other notes copied');
+    });
+
+
+    // Legacy anonymous-code buttons (can be hidden in UI if unused)
     $('#buildPayloadBtn')?.addEventListener('click', onBuildPayload);
     $('#copyPayloadBtn')?.addEventListener('click', onCopyPayload);
+
     $('#toFormBtn')?.addEventListener('click', onGoToForm);
     $('#behOtherChk')?.addEventListener('change', toggleOther);
 

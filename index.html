@@ -6,17 +6,17 @@
   <title>ECU AI Usage Acknowledgement Tool — Pilot</title>
   <meta name="description" content="Static, code-only prototype to help students generate an ECU-style acknowledgement of generative AI use. Optional anonymous analytics via Microsoft Forms (DLP-friendly)." />
   <link rel="stylesheet" href="assets/css/ecu.css" />
-  <link rel="preconnect" href="https://forms.office.com">    
+  <link rel="preconnect" href="https://forms.office.com">
   <link rel="dns-prefetch" href="//forms.office.com">
-
 </head>
+
 <body>
   <a class="skip" href="#main">Skip to content</a>
 
   <header class="site-header" role="banner" aria-label="Site header">
     <div class="brandbar"></div>
-        <h1 class="title">ECU AI Usage Acknowledgement Tool</h1>
-        <p class="subtitle">Pilot prototype to help students generate an ECU-style acknowledgement of generative AI use. Optional anonymous analytics via Microsoft Forms (DLP-friendly).</p>
+    <h1 class="title">ECU AI Usage Acknowledgement Tool</h1>
+    <p class="subtitle">Pilot prototype to help students generate an ECU-style acknowledgement of generative AI use. Optional anonymous analytics via Microsoft Forms (DLP-friendly).</p>
   </header>
 
   <main id="main" class="wrap" role="main">
@@ -29,8 +29,17 @@
           <label class="field-label">1) Behaviours</label>
           <p class="hint">Choose what you used AI for.</p>
           <div id="behaviourPills" class="row" aria-live="polite"></div>
-          <label class="inline"><input type="checkbox" id="behOtherChk" /> Add “Other”</label>
-          <input type="text" id="behOtherText" class="input" placeholder="Other behaviours, e.g., outlining; brainstorming specific angles" style="display:none" />
+
+          <label class="inline">
+            <input type="checkbox" id="behOtherChk" /> Add “Other”
+          </label>
+          <input
+            type="text"
+            id="behOtherText"
+            class="input"
+            placeholder="Other behaviours, e.g., outlining; brainstorming specific angles"
+            style="display:none"
+          />
         </fieldset>
 
         <fieldset class="section" id="tools">
@@ -64,31 +73,39 @@
 
         <div class="divider"></div>
 
-        <h2>Anonymous analytics (optional)</h2>
-        <p class="hint">To help ECU understand how students are acknowledging AI use, you can submit an anonymous code. <strong>No PII or assignment text</strong> is collected.</p>
-        <div class="section stack">
-          <button id="buildPayloadBtn" class="btn">Build anonymous code</button>
-          <button id="copyPayloadBtn" class="btn success" disabled>Copy anonymous code</button>
-          <button id="toFormBtn" class="btn ghost">Go to Form</button>
-        </div>
-        <div id="payloadWrap" class="result" style="display:none">
-          <pre id="payloadText"></pre>
+        <h3>Anonymous AI-use submission</h3>
+        <h4 class="mt-0">Plain-text for Microsoft Form</h4>
+        <p class="muted">Use these one-click copies, then paste into the Form fields below.</p>
+
+        <div class="field-copy" aria-label="Quick copy for matching Form fields">
+        <button id="copyMapMicro" class="btn btn-xxs">Copy → Usage mapping</button>
+        <button id="copyBehMicro" class="btn btn-xxs ghost">Copy → Behaviours used</button>
+        <button id="copyToolsMicro" class="btn btn-xxs ghost">Copy → AI tools used</button>
+        <button id="copyNoteMicro" class="btn btn-xxs ghost">Copy → Other notes</button>
+        <button id="toFormBtn" class="btn ghost">Go to Form</button>
         </div>
 
-        <div class="result" id="formsShell">
-        <iframe id="formsFrame"
-          title="Anonymous AI-use submission"
-          width="100%" height="480" frameborder="0" loading="lazy"
-          src="about:blank"
-          style="border:none;max-width:100%;max-height:100vh"></iframe>
-        </div>
-        <!-- Same-tab fallback (no new window) -->
-        <p class="hint" style="margin-top:8px">
-            If the form doesn’t appear or is blocked, 
-        <a href="#" id="openFormSameTab">open the full form in this tab</a>.
-        </p>
+        <div class="callout alert" role="status">
+          If the Microsoft Form doesn’t appear or is blocked,
+          <a href="#" id="openFormSameTab" class="link-strong">open the full form in this tab</a>.
         </div>
 
+        <!-- Embedded Microsoft Form -->
+        <section id="formsSection" class="forms-embed">
+          <!-- app.js will set src from APP_CONFIG.formsEmbedUrl -->
+          <iframe
+            id="formsFrame"
+            title="ECU AI Use — Anonymous"
+            width="100%"
+            height="720"
+            style="border:0; background:#fff; border-radius:12px"
+            src=""
+            allowfullscreen
+            webkitallowfullscreen
+            mozallowfullscreen
+            msallowfullscreen>
+          </iframe>
+        </section>
 
         <footer class="privacy">
           <p><strong>Privacy:</strong> This page runs locally in your browser. Optional analytics only include behaviours, tool names, an optional note, a timestamp, and the fixed action <code>declaration_generated</code>. Target retention for the pilot is 180 days.</p>
@@ -96,18 +113,17 @@
       </section>
     </section>
   </main>
-  
+
   <footer class="site-footer" role="contentinfo" aria-label="Footer">
-  <div class="wrap footer-inner">
-    <div class="footer-meta">
-      <div>
-        © <span id="year"></span> Edith Cowan University. All rights reserved.
-        <span class="sep">•</span> Pilot prototype (for testing) — not an official policy document.
+    <div class="wrap footer-inner">
+      <div class="footer-meta">
+        <div>
+          © <span id="year"></span> Edith Cowan University. All rights reserved.
+          <span class="sep">•</span> Pilot prototype (for testing) — not an official policy document.
+        </div>
       </div>
     </div>
-  </div>
-</footer>
-
+  </footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 

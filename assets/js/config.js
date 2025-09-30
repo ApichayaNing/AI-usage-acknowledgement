@@ -8,9 +8,8 @@ window.APP_CONFIG = {
     { id: 'research_support', label: 'Research support (keywords/search/citations)' },
     { id: 'accessibility', label: 'Accessibility support (simplify/reading level)' }
   ],
-  formsEmbedUrl: "https://forms.office.com/Pages/ResponsePage.aspx?id=PTLLm6N_50Wjb22c_bzCcl0xfq859qZCpxY1RaAyqCdUMUpFSktEMUQyWFZXNEUwMzUyV0I5NVgzNC4u&embed=true",
-  formsShareUrl: "https://forms.office.com/Pages/ResponsePage.aspx?id=PTLLm6N_50Wjb22c_bzCcl0xfq859qZCpxY1RaAyqCdUMUpFSktEMUQyWFZXNEUwMzUyV0I5NVgzNC4u",
-  payloadVersion: 1,
+  formsShareUrl: 'https://forms.office.com/Pages/ResponsePage.aspx?id=PTLLm6N_50Wjb22c_bzCcl0xfq859qZCpxY1RaAyqCdUMUpFSktEMUQyWFZXNEUwMzUyV0I5NVgzNC4u',
+  formsEmbedUrl: 'https://forms.office.com/Pages/ResponsePage.aspx?id=PTLLm6N_50Wjb22c_bzCcl0xfq859qZCpxY1RaAyqCdUMUpFSktEMUQyWFZXNEUwMzUyV0I5NVgzNC4u&embed=true',
   analyticsAction: 'declaration_generated'
 };
 
